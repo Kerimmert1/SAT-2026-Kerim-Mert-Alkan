@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Yeni İzin / Mazeret Talebi - TR3MX{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <!-- Geri Dön Linki -->
+        <a href="{{ url_for('leaves_list') }}" class="btn btn-link text-decoration-none text-muted p-0 mb-3 small">
+            <i class="fas fa-arrow-left me-1"></i> İzin Taleplerine Geri Dön
+        </a>
+
+        <div class="content-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">İzin / Mazeret Talebi Oluştur</h5>
+                    <span class="text-muted small">Yönetici onayına sunulmak üzere izin veya rapor bildirimi yapın</span>
+                </div>
+                <div class="icon-box" style="background: rgba(79, 70, 229, 0.1); color: #4f46e5;">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form action="{{ url_for('request_leave') }}" method="POST">
+                    <!-- İzin Türü -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">İzin / Mazeret Türü <span class="text-danger">*</span></label>
+                        <select name="leave_type" class="form-select" required>
+                            <option value="">İzin türünü seçiniz...</option>
+                            <option value="Yıllık İzin">Yıllık İzin (Ücretli)</option>
+                            <option value="Mazeret İzni">Mazeret İzni (Resmi İşler / Ailevi)</option>
+                            <option value="Sağlık Raporu">Sağlık Raporu (Hekim İstirahat)</option>
+                            <option value="Uzaktan Çalışma / Ders">Uzaktan Çalışma / Ders Katılımı</option>
+                        </select>
+                    </div>
+
+                    <!-- Tarih Seçimleri -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Başlangıç Tarihi <span class="text-danger">*</span></label>
+                            <input type="date" name="start_date" id="leave_start_date" class="form-control" required value="{{ today_iso }}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Bitiş Tarihi <span class="text-danger">*</span></label>
+                            <input type="date" name="end_date" id="leave_end_date" class="form-control" required value="{{ today_iso }}">
+                        </div>
+                    </div>
+
+                    <!-- Dinamik Gün Hesaplayıcı Rozeti -->
+                    <div class="mb-3 text-center">
+                        <div id="calculated_days_badge" class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6 px-3 py-2">
+                            1 Gün Talep Ediliyor
+                        </div>
+                    </div>
+
+                    <!-- Gerekçe / Açıklama -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold">Talep Gerekçesi / Mazeret Detayı <span class="text-danger">*</span></label>
+                        <textarea name="reason" class="form-control" rows="4" placeholder="İzin gerekçenizi ve gerekiyorsa hekim raporu veya resmi mazeret notunuzu belirtiniz..." required></textarea>
+                        <div class="form-text small">Talebiniz kurum yöneticisine iletilecek ve onaylandığında devamsızlık durumunuz güncellenecektir.</div>
+                    </div>
+
+                    <!-- Bilgilendirme Kutusu -->
+                    <div class="alert alert-info py-2 px-3 rounded-3 small mb-4">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Sağlık raporları yönetmelik gereği onaylandıktan sonra devamsızlık gün sayınıza eklenmez, mazeretli sayılır.
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary-gradient py-2.5 rounded-3 fw-bold">
+                            <i class="fas fa-paper-plane me-2"></i> Talebi Yöneticinin Onayına Gönder
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

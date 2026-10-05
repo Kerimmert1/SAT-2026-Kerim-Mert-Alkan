@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Yeni Kullanıcı Kaydı - TR3MX{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <a href="{{ url_for('users_list') }}" class="btn btn-link text-decoration-none text-muted p-0 mb-3 small">
+            <i class="fas fa-arrow-left me-1"></i> Kullanıcı Listesine Geri Dön
+        </a>
+
+        <div class="content-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Yeni Personel / Öğrenci Kaydı</h5>
+                    <span class="text-muted small">Sisteme yeni bir kullanıcı ekleyin ve devamsızlık/izin limitlerini belirleyin</span>
+                </div>
+                <div class="icon-box" style="background: rgba(79, 70, 229, 0.1); color: #4f46e5;">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form action="{{ url_for('user_create') }}" method="POST">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Öğrenci No / Personel Kodu <span class="text-danger">*</span></label>
+                            <input type="text" name="user_code" class="form-control" placeholder="Örn: 20240105 veya PER-104" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Sistem Rolü <span class="text-danger">*</span></label>
+                            <select name="role" class="form-select" required>
+                                <option value="ogrenci">Öğrenci</option>
+                                <option value="personel">Personel / Öğretim Üyesi</option>
+                                <option value="admin">Yönetici (Admin)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Ad Soyad <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" placeholder="Örn: Kerem Demir" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">E-Posta Adresi <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" placeholder="kullanici@okul.edu.tr" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Başlangıç Şifresi <span class="text-danger">*</span></label>
+                            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Telefon Numarası</label>
+                            <input type="text" name="phone" class="form-control" placeholder="05XX XXX XX XX">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Departman / Bölüm</label>
+                            <input type="text" name="department" class="form-control" placeholder="Örn: Yazılım Mühendisliği">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Unvan / Sınıf</label>
+                            <input type="text" name="title" class="form-control" placeholder="Örn: 2. Sınıf veya Araştırma Görevlisi">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-sliders text-primary me-2"></i> Hak ve Limit Parametreleri</h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Maksimum Devamsızlık Limiti (Gün)</label>
+                            <input type="number" step="0.5" name="max_absence_limit" class="form-control" value="20.0" required>
+                            <div class="form-text small">Öğrenci veya personelin dönemlik/yıllık hakkı (Genelde 20 gün).</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Yıllık / Mazeret İzin Hakkı (Gün)</label>
+                            <input type="number" step="0.5" name="total_leave_days" class="form-control" value="15.0" required>
+                            <div class="form-text small">Personelin yıllık veya mazeret izni gün kotası.</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('users_list') }}" class="btn btn-light px-4">İptal</a>
+                        <button type="submit" class="btn btn-primary-gradient px-4">
+                            <i class="fas fa-check me-1"></i> Kullanıcıyı Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
