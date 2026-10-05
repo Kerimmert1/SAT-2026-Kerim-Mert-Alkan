@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Kullanıcı Düzenle - TR3MX{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <a href="{{ url_for('users_list') }}" class="btn btn-link text-decoration-none text-muted p-0 mb-3 small">
+            <i class="fas fa-arrow-left me-1"></i> Kullanıcı Listesine Geri Dön
+        </a>
+
+        <div class="content-card">
+            <div class="card-header">
+                <div>
+                    <h5 class="fw-bold mb-0">Kullanıcı Bilgilerini Düzenle: {{ user.name }}</h5>
+                    <span class="text-muted small">Rol, devamsızlık sınırı veya şifre güncellemesi</span>
+                </div>
+                <div class="avatar-circle" style="width: 40px; height: 40px; background-color: {{ user.avatar_color }};">
+                    {{ user.name[:1] }}
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form action="{{ url_for('user_edit', user_id=user.id) }}" method="POST">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Öğrenci No / Personel Kodu</label>
+                            <input type="text" class="form-control bg-body-tertiary" value="{{ user.user_code }}" disabled>
+                            <div class="form-text small">Kullanıcı kodu değiştirilemez.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Sistem Rolü <span class="text-danger">*</span></label>
+                            <select name="role" class="form-select" required>
+                                <option value="ogrenci" {% if user.role == 'ogrenci' %}selected{% endif %}>Öğrenci</option>
+                                <option value="personel" {% if user.role == 'personel' %}selected{% endif %}>Personel / Öğretim Üyesi</option>
+                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Yönetici (Admin)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Ad Soyad <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" value="{{ user.name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">E-Posta Adresi <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Yeni Şifre (Değiştirmek İstemiyorsanız Boş Bırakın)</label>
+                            <input type="password" name="password" class="form-control" placeholder="Boş bırakılırsa şifre değişmez">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Telefon Numarası</label>
+                            <input type="text" name="phone" class="form-control" value="{{ user.phone or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Departman / Bölüm</label>
+                            <input type="text" name="department" class="form-control" value="{{ user.department or '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Unvan / Sınıf</label>
+                            <input type="text" name="title" class="form-control" value="{{ user.title or '' }}">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-sliders text-primary me-2"></i> Devamsızlık ve İzin Limitleri</h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Maksimum Devamsızlık Limiti (Gün)</label>
+                            <input type="number" step="0.5" name="max_absence_limit" class="form-control" value="{{ user.max_absence_limit }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Yıllık / Mazeret İzin Hakkı (Gün)</label>
+                            <input type="number" step="0.5" name="total_leave_days" class="form-control" value="{{ user.total_leave_days }}" required>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('users_list') }}" class="btn btn-light px-4">İptal</a>
+                        <button type="submit" class="btn btn-primary-gradient px-4">
+                            <i class="fas fa-save me-1"></i> Değişiklikleri Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

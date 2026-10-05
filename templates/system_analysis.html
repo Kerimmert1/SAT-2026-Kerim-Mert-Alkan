@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block title %}Sistem Analizi ve Tasarımı Sunumu - TR3MX{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="badge bg-warning text-dark fw-bold px-3 py-1">SİSTEM ANALİZİ VE TASARIMI DERSİ</span>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">PROJE DÖKÜMANTASYONU</span>
+        </div>
+        <h3 class="fw-bold mb-1">Öğrenci & Personel Devamsızlık ve İzin Takip Sistemi</h3>
+        <p class="text-muted small mb-0">Rol bazlı yetkilendirme (RBAC), ER Diyagramı, Use-Case analizi ve veri akış mimarisi</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="window.print()">
+            <i class="fas fa-print me-1"></i> Sayfayı Yazdır / PDF Yap
+        </button>
+    </div>
+</div>
+
+<!-- ÖZET BİLGİ KARTLARI -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-3">
+        <div class="stat-card">
+            <span class="text-muted small fw-semibold">Proje Modeli</span>
+            <h5 class="fw-bold text-primary mt-1 mb-0">Agile / Scrum & Prototipleme</h5>
+            <div class="text-muted small mt-1">İteratif ve modüler geliştirme</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="stat-card">
+            <span class="text-muted small fw-semibold">Yazılım Mimarisi</span>
+            <h5 class="fw-bold text-success mt-1 mb-0">MVC / MVT Mimarisi</h5>
+            <div class="text-muted small mt-1">Model (SQLite), View (Jinja2), Controller (Flask)</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="stat-card">
+            <span class="text-muted small fw-semibold">Yetkilendirme Modeli</span>
+            <h5 class="fw-bold text-purple mt-1 mb-0" style="color: #8b5cf6;">RBAC (Rol Bazlı Erişim)</h5>
+            <div class="text-muted small mt-1">Admin, Personel ve Öğrenci rolleri</div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="stat-card">
+            <span class="text-muted small fw-semibold">Veri Bütünlüğü</span>
+            <h5 class="fw-bold text-warning-emphasis mt-1 mb-0">ACID Uyumlu SQLite</h5>
+            <div class="text-muted small mt-1">İlişkisel Foreign Key & On Delete Cascade</div>
+        </div>
+    </div>
+</div>
+
+<!-- 1. BÖLÜM: PROBLEM TANIMI VE SİSTEM GEREKSİNİMLERİ -->
+<div class="content-card">
+    <div class="card-header">
+        <h6 class="fw-bold mb-0"><i class="fas fa-bullseye text-primary me-2"></i> 1. Problem Tanımı ve Sistem Amacı</h6>
+        <span class="architecture-badge">Gereksinim Analizi</span>
+    </div>
+    <div class="card-body">
+        <p>
+            Geleneksel eğitim kurumlarında ve şirketlerde yoklama ve devamsızlık takipleri genellikle kağıt imzalar, manuel Excel çizelgeleri veya pahalı, karmaşık turnike donanımları ile yapılmaktadır. Bu yöntemler;
+            <strong>veri kaybına, geriye dönük sahte imzalara, izin/mazeret belgelerinin kaybolmasına ve devamsızlık sınırına ulaşan kişilerin vaktinde tespit edilememesine</strong> yol açmaktadır.
+        </p>
+        <p class="mb-0">
+            <strong>TR3MX Takip Sistemi</strong>, bu darboğazı ortadan kaldırarak; web tarayıcıları, sınıf/ofis kapısı kiosk tabletleri ve mobil cihazlar üzerinden 
+            <strong>anlık yoklama alma, otomatik tolerans/geç kalma tespiti, izin onaylama hiyerarşisi ve risk takip uyarıları</strong> sağlayan merkezi bir otomasyon çözümüdür.
+        </p>
+    </div>
+</div>
+
+<!-- 2. BÖLÜM: ROL BAZLI YETKİLENDİRME (RBAC) MATRİSİ -->
+<div class="content-card">
+    <div class="card-header">
+        <h6 class="fw-bold mb-0"><i class="fas fa-user-shield text-primary me-2"></i> 2. Rol Bazlı Yetkilendirme (RBAC Matrisi)</h6>
+        <span class="architecture-badge">Güvenlik ve Yetki</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped mb-0 text-center align-middle small">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-start ps-3">İşlem / Fonksiyon</th>
+                        <th>Yönetici (Admin)</th>
+                        <th>Personel / Hoca</th>
+                        <th>Öğrenci</th>
+                        <th>Kiosk Terminali</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-start ps-3 fw-semibold">Günlük Giriş / Çıkış Yapma (Check-in/out)</td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="text-start ps-3 fw-semibold">Kendi Devamsızlık ve İzin Durumunu Görüntüleme</td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="text-start ps-3 fw-semibold">Yeni İzin / Mazeret Talebi Oluşturma</td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="text-start ps-3 fw-semibold">İzin Taleplerini Onaylama / Reddetme</td>
+                        <td><i class="fas fa-check text-success fw-bold"></i> Tam Yetkili</td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="text-start ps-3 fw-semibold">Tüm Kurumun Devamsızlık Listesini ve İstatistiklerini Görme</td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="text-start ps-3 fw-semibold">Manuel Giriş/Devamsızlık Kaydı Ekleme & Silme</td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="text-start ps-3 fw-semibold">Kullanıcı Ekleme / Düzenleme / Limit Belirleme</td>
+                        <td><i class="fas fa-check text-success"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                    </tr>
+                    <tr>
+                        <td class="text-start ps-3 fw-semibold">Excel / CSV Raporu Dışa Aktarma</td>
+                        <td><i class="fas fa-check text-success"></i> Tüm Kurum</td>
+                        <td><i class="fas fa-check text-success"></i> Sadece Kendi</td>
+                        <td><i class="fas fa-check text-success"></i> Sadece Kendi</td>
+                        <td><i class="fas fa-times text-danger"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 3. BÖLÜM: VERİTABANI ŞEMASI VE ER DİYAGRAMI -->
+<div class="content-card">
+    <div class="card-header">
+        <h6 class="fw-bold mb-0"><i class="fas fa-database text-primary me-2"></i> 3. Veritabanı Mimarisi & Varlık-İlişki (ER) Diyagramı</h6>
+        <span class="architecture-badge">SQLite İlişkisel Şema</span>
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            <!-- Tablo 1: users -->
+            <div class="col-12 col-md-4">
+                <div class="code-window">
+                    <div class="code-header">
+                        <span class="circle-dot bg-danger"></span>
+                        <span class="circle-dot bg-warning"></span>
+                        <span class="circle-dot bg-success"></span>
+                        <span class="ms-1 fw-bold text-white">users (Kullanıcılar)</span>
+                    </div>
+                    <div class="p-3 font-monospace small">
+                        <div><strong class="text-warning">PK</strong> id (INTEGER)</div>
+                        <div><strong class="text-info">UQ</strong> user_code (VARCHAR)</div>
+                        <div>name (VARCHAR)</div>
+                        <div><strong class="text-info">UQ</strong> email (VARCHAR)</div>
+                        <div>password_hash (VARCHAR)</div>
+                        <div>role (admin|personel|ogrenci)</div>
+                        <div>department (VARCHAR)</div>
+                        <div>title (VARCHAR)</div>
+                        <div>max_absence_limit (REAL)</div>
+                        <div>total_leave_days (REAL)</div>
+                        <div>avatar_color (VARCHAR)</div>
+                        <div>is_active (INTEGER)</div>
+                        <div>created_at (TIMESTAMP)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tablo 2: attendances -->
+            <div class="col-12 col-md-4">
+                <div class="code-window">
+                    <div class="code-header">
+                        <span class="circle-dot bg-danger"></span>
+                        <span class="circle-dot bg-warning"></span>
+                        <span class="circle-dot bg-success"></span>
+                        <span class="ms-1 fw-bold text-white">attendances (Yoklama)</span>
+                    </div>
+                    <div class="p-3 font-monospace small">
+                        <div><strong class="text-warning">PK</strong> id (INTEGER)</div>
+                        <div><strong class="text-primary">FK</strong> user_id -> users(id)</div>
+                        <div><strong class="text-info">UQ</strong> (user_id, date)</div>
+                        <div>date (DATE: YYYY-MM-DD)</div>
+                        <div>check_in_time (TIME)</div>
+                        <div>check_out_time (TIME)</div>
+                        <div>status (Zamanında|Geç|Gelmedi)</div>
+                        <div>notes (TEXT)</div>
+                        <div>device_info (VARCHAR)</div>
+                        <div>created_at (TIMESTAMP)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tablo 3: leave_requests -->
+            <div class="col-12 col-md-4">
+                <div class="code-window">
+                    <div class="code-header">
+                        <span class="circle-dot bg-danger"></span>
+                        <span class="circle-dot bg-warning"></span>
+                        <span class="circle-dot bg-success"></span>
+                        <span class="ms-1 fw-bold text-white">leave_requests (İzinler)</span>
+                    </div>
+                    <div class="p-3 font-monospace small">
+                        <div><strong class="text-warning">PK</strong> id (INTEGER)</div>
+                        <div><strong class="text-primary">FK</strong> user_id -> users(id)</div>
+                        <div>leave_type (Yıllık|Mazeret|Rapor)</div>
+                        <div>start_date (DATE)</div>
+                        <div>end_date (DATE)</div>
+                        <div>days_count (REAL)</div>
+                        <div>reason (TEXT)</div>
+                        <div>status (Beklemede|Onay|Red)</div>
+                        <div>admin_note (TEXT)</div>
+                        <div><strong class="text-primary">FK</strong> reviewed_by -> users(id)</div>
+                        <div>created_at (TIMESTAMP)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-secondary py-2 px-3 mt-3 mb-0 small">
+            <i class="fas fa-link me-1 text-primary"></i> <strong>İlişki Tanımları:</strong>
+            <code>users (1) &mdash;&mdash;&lt; (N) attendances</code> (Bir kullanıcının birden çok günlük katılım kaydı olabilir) &bull;
+            <code>users (1) &mdash;&mdash;&lt; (N) leave_requests</code> (Bir kullanıcının birden çok izin talebi olabilir).
+            <code>ON DELETE CASCADE</code> kuralı ile kullanıcı silindiğinde ilişkili tüm kayıtlar tutarlı şekilde temizlenir.
+        </div>
+    </div>
+</div>
+
+<!-- 4. BÖLÜM: KULLANIM SENARYOLARI (USE CASE) -->
+<div class="content-card">
+    <div class="card-header">
+        <h6 class="fw-bold mb-0"><i class="fas fa-sitemap text-primary me-2"></i> 4. Kullanım Senaryoları (Use-Case Özeti)</h6>
+        <span class="architecture-badge">Aktör & Davranış</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Use Case ID</th>
+                        <th>Senaryo Adı</th>
+                        <th>Birincil Aktör</th>
+                        <th>Ön Koşul</th>
+                        <th>Ana Akış & Sonuç</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ps-3 fw-bold text-primary">UC-01</td>
+                        <td class="fw-semibold">Oturum Açma (Login)</td>
+                        <td>Kullanıcı / Admin</td>
+                        <td>Aktif hesap varlığı</td>
+                        <td>Kullanıcı e-posta/no ve şifre girer; şifre hash kontrolünden geçerse rolüne uygun dashboard'a yönlendirilir.</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3 fw-bold text-primary">UC-02</td>
+                        <td class="fw-semibold">Giriş / Çıkış Damgası Basma</td>
+                        <td>Personel / Öğrenci</td>
+                        <td>Giriş yapmış olmak</td>
+                        <td>Butona tıklandığında anlık saat alınır, mesai başlangıcı ve tolerans süresi ile kıyaslanarak 'Zamanında' veya 'Geç Kaldı' statüsü oluşturulur.</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3 fw-bold text-primary">UC-03</td>
+                        <td class="fw-semibold">İzin Talebi Gönderme</td>
+                        <td>Personel / Öğrenci</td>
+                        <td>Giriş yapmış olmak</td>
+                        <td>İzin türü, başlangıç/bitiş tarihi ve mazeret girilir. Sistem gün sayısını otomatik hesaplar ve 'Beklemede' olarak kaydeder.</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3 fw-bold text-primary">UC-04</td>
+                        <td class="fw-semibold">İzin Talebini Değerlendirme</td>
+                        <td>Yönetici (Admin)</td>
+                        <td>Admin yetkisi</td>
+                        <td>Bekleyen talep incelenir, isteğe bağlı not yazılıp Onay veya Red verilir. Onay durumunda bugünkü katılım kaydı otomatik 'İzinli'ye dönüşür.</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3 fw-bold text-primary">UC-05</td>
+                        <td class="fw-semibold">Devamsızlık Sınırı Risk Analizi</td>
+                        <td>Sistem & Yönetici</td>
+                        <td>-</td>
+                        <td>Kullanıcının 'Gelmedi' günleri max_absence_limit ile kıyaslanır. %75 ve üzerine ulaşanlar kritik kırmızı rozet ile risk listesine alınır.</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3 fw-bold text-primary">UC-06</td>
+                        <td class="fw-semibold">Kiosk Terminalinde Kart Basma</td>
+                        <td>Öğrenci / Personel</td>
+                        <td>Kiosk ekranı açık</td>
+                        <td>Kart no veya kod tuşlanır. AJAX isteği ile sayfa yenilenmeden sesli/görsel onay mesajı dönerek katılım kaydedilir.</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3 fw-bold text-primary">UC-07</td>
+                        <td class="fw-semibold">Verileri Excel / CSV İndirme</td>
+                        <td>Yönetici / Kullanıcı</td>
+                        <td>Giriş yapmış olmak</td>
+                        <td>Filtrelenen kayıtlar UTF-8 BOM destekli CSV olarak dışa aktarılır, MS Excel'de bozulmadan açılır.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 5. BÖLÜM: VERİ AKIŞ DİYAGRAMI (DFD) VE YAZILIM YIĞINI -->
+<div class="row g-4">
+    <div class="col-12 col-lg-6">
+        <div class="content-card h-100">
+            <div class="card-header">
+                <h6 class="fw-bold mb-0"><i class="fas fa-arrows-split-up-and-left text-primary me-2"></i> 5. Veri Akış Mimarisi (DFD Mantığı)</h6>
+            </div>
+            <div class="card-body">
+                <ol class="small text-muted ps-3 mb-0" style="line-height: 1.8;">
+                    <li><strong>Girdi Katmanı:</strong> Web arayüzü formları veya Kiosk barkod/QR okuyucu üzerinden veri akışı başlar.</li>
+                    <li><strong>Kontrol Katmanı (Flask App):</strong> Gelen veriler <code>login_required</code> ve <code>admin_required</code> dekoratörleri ile güvenlik süzgecinden geçer.</li>
+                    <li><strong>İş Mantığı Katmanı (Business Logic):</strong> Mesai saati toleransı hesaplanır (<code>datetime</code> farkları), devamsızlık limit yüzdesi formülize edilir.</li>
+                    <li><strong>Kayıt Katmanı (SQLite DB):</strong> Parametreli SQL sorguları (SQL Injection önlemi) ile veritabanına ACID garantisiyle kaydedilir.</li>
+                    <li><strong>Görselleştirme Katmanı (Jinja2 & Chart.js):</strong> Veritabanından çekilen analizler responsive Bootstrap arayüzünde grafiklere ve istatistik kartlarına dönüştürülür.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+        <div class="content-card h-100">
+            <div class="card-header">
+                <h6 class="fw-bold mb-0"><i class="fas fa-layer-group text-primary me-2"></i> 6. Kullanılan Teknolojiler ve Avantajları</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <i class="fab fa-python fa-2x text-warning"></i>
+                    <div>
+                        <div class="fw-bold small">Python 3.14 & Flask Web Çatısı</div>
+                        <div class="text-muted small">Hızlı geliştirme, modüler route yapısı, hafif bellek tüketimi.</div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <i class="fas fa-database fa-2x text-info"></i>
+                    <div>
+                        <div class="fw-bold small">SQLite İlişkisel Veritabanı</div>
+                        <div class="text-muted small">Harici sunucu gerektirmeyen (zero-config), tek dosya (.db) ile taşınabilir tam ilişkisel veritabanı.</div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <i class="fab fa-bootstrap fa-2x text-primary"></i>
+                    <div>
+                        <div class="fw-bold small">Bootstrap 5.3 & Glassmorphism CSS</div>
+                        <div class="text-muted small">Mobil uyumlu (responsive) SaaS paneli, Dark/Light tema geçişi.</div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fas fa-chart-line fa-2x text-success"></i>
+                    <div>
+                        <div class="fw-bold small">Chart.js Veri Görselleştirme</div>
+                        <div class="text-muted small">Haftalık devamsızlık ve izin dağılımını interaktif grafiklerle sunma.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

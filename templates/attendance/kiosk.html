@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hızlı Giriş Kiosk Terminali - TR3MX</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body style="background: radial-gradient(circle at 50% 20%, #1e1b4b 0%, #090d16 100%);">
+    
+    <div class="kiosk-container">
+        <!-- Üst Bilgi Barı -->
+        <div class="d-flex justify-content-between align-items-center w-100 mb-4 px-3" style="max-width: 620px;">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary px-3 py-2 rounded-pill">
+                    <i class="fas fa-desktop me-1"></i> Kapı / Sınıf Terminal Modu
+                </span>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                <i class="fas fa-arrow-left me-1"></i> Panele Dön
+            </a>
+        </div>
+
+        <div class="kiosk-card">
+            <!-- Kurum Logosu & Dijital Saat -->
+            <div class="mb-4">
+                <div class="d-inline-flex p-3 rounded-circle mb-3" style="background: rgba(79, 70, 229, 0.2); border: 1px solid rgba(79, 70, 229, 0.4);">
+                    <i class="fas fa-fingerprint fa-2x text-primary"></i>
+                </div>
+                <h5 class="fw-bold text-white-50 text-uppercase letter-spacing-1 mb-1">{{ settings.institution_name }}</h5>
+                <div class="clock-display live-clock mb-1">--:--:--</div>
+                <div class="text-white-50 small">
+                    <i class="far fa-calendar-alt me-1"></i> <span id="currentDateStr"></span>
+                </div>
+            </div>
+
+            <!-- Canlı Bildirim / Sonuç Ekranı (Alert Box) -->
+            <div id="kioskResultBox" class="alert d-none py-3 px-4 rounded-4 text-start mb-4 shadow">
+                <div class="d-flex align-items-center gap-3">
+                    <div id="resultIcon" class="fs-2"></div>
+                    <div>
+                        <div id="resultTitle" class="fw-bold fs-6"></div>
+                        <div id="resultDesc" class="small opacity-75"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <div class="mb-4 text-start">
+                <label class="form-label text-white-50 small fw-semibold">Kart No / Öğrenci veya Personel Numarası</label>
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-dark border-secondary text-primary">
+                        <i class="fas fa-id-card"></i>
+                    </span>
+                    <input type="text" id="kioskUserCode" class="form-control bg-dark text-white border-secondary fs-5" 
+                           placeholder="Örn: 20230101 veya PER-101" autofocus autocomplete="off">
+                </div>
+                <div class="form-text text-white-50 small">
+                    Hızlı kart okuyucu (Barkod / QR / RFID) veya manuel tuşlama yapabilirsiniz.
+                </div>
+            </div>
+
+            <!-- Giriş & Çıkış Aksiyon Butonları -->
+            <div class="row g-3">
+                <div class="col-6">
+                    <button type="button" id="btnKioskIn" class="btn btn-check-in w-100 py-3 rounded-3 d-flex flex-column align-items-center justify-content-center gap-1">
+                        <i class="fas fa-sign-in-alt fs-3"></i>
+                        <span class="fw-bold">GİRİŞ YAP</span>
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button type="button" id="btnKioskOut" class="btn btn-check-out w-100 py-3 rounded-3 d-flex flex-column align-items-center justify-content-center gap-1">
+                        <i class="fas fa-sign-out-alt fs-3"></i>
+                        <span class="fw-bold">ÇIKIŞ YAP</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hızlı Test Kodları -->
+            <div class="mt-4 pt-3 border-top border-secondary-subtle">
+                <div class="text-white-50 small mb-2">Hızlı Test İçin Tıklayın:</div>
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill code-btn" data-code="PER-101">Dr. Selin (PER-101)</button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill code-btn" data-code="20230101">Zeynep (20230101)</button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-pill code-btn" data-code="20230102">Caner (20230102)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.getElementById('currentDateStr').textContent = new Date().toLocaleDateString('tr-TR', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+
+        // Hızlı test butonlarına tıklanınca inputa yaz
+        document.querySelectorAll('.code-btn').forEach(b => {
+            b.addEventListener('click', () => {
+                document.getElementById('kioskUserCode').value = b.getAttribute('data-code');
+                document.getElementById('kioskUserCode').focus();
+            });
+        });
+
+        // AJAX ile Kiosk Giriş / Çıkış Gönderme
+        function handleKioskAction(actionType) {
+            const userCodeInput = document.getElementById('kioskUserCode');
+            const code = userCodeInput.value.trim();
+            const resultBox = document.getElementById('kioskResultBox');
+            const resultIcon = document.getElementById('resultIcon');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultDesc = document.getElementById('resultDesc');
+
+            if (!code) {
+                userCodeInput.focus();
+                showResult(false, 'Hata', 'Lütfen kart no veya numara giriniz.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('user_code', code);
+            formData.append('action_type', actionType);
+
+            fetch("{{ url_for('kiosk') }}", {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showResult(true, `${data.action}: ${data.user_name}`, 
+                        `Bölüm: ${data.department} | Saat: ${data.time} | Durum: ${data.status}`);
+                    userCodeInput.value = '';
+                } else {
+                    showResult(false, 'İşlem Başarısız', data.message);
+                }
+                userCodeInput.focus();
+            })
+            .catch(err => {
+                showResult(false, 'Sistem Hatası', 'Sunucu ile iletişim kurulamadı.');
+            });
+        }
+
+        function showResult(isSuccess, title, desc) {
+            const box = document.getElementById('kioskResultBox');
+            const icon = document.getElementById('resultIcon');
+            const t = document.getElementById('resultTitle');
+            const d = document.getElementById('resultDesc');
+
+            box.className = isSuccess ? 'alert alert-success d-block py-3 px-4 rounded-4 shadow' : 'alert alert-danger d-block py-3 px-4 rounded-4 shadow';
+            icon.innerHTML = isSuccess ? '<i class="fas fa-circle-check text-success"></i>' : '<i class="fas fa-circle-xmark text-danger"></i>';
+            t.textContent = title;
+            d.textContent = desc;
+
+            setTimeout(() => {
+                box.className = 'alert d-none';
+            }, 6000);
+        }
+
+        document.getElementById('btnKioskIn').addEventListener('click', () => handleKioskAction('in'));
+        document.getElementById('btnKioskOut').addEventListener('click', () => handleKioskAction('out'));
+
+        // Enter tuşuna basınca varsayılan olarak giriş yap
+        document.getElementById('kioskUserCode').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleKioskAction('in');
+            }
+        });
+    </script>
+</body>
+</html>

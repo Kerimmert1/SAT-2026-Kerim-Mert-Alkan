@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="panel">
+  <h2>Öğrenci Ekle</h2>
+  <form method="post" action="{{ url_for('add_student') }}">
+    <div class="two-col">
+      <div>
+        <label>Ad Soyad</label>
+        <input type="text" name="name" required>
+      </div>
+      <div>
+        <label>Öğrenci Numarası</label>
+        <input type="text" name="student_number" required>
+      </div>
+      <div style="grid-column:1 / -1;">
+        <label>Sınıf</label>
+        <input type="text" name="class_name" required>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-success">Öğrenci Ekle</button>
+  </form>
+</div>
+
+<div class="panel" style="margin-top:20px;">
+  <h2>Öğrenci Listesi</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Ad Soyad</th>
+        <th>Öğrenci No</th>
+        <th>Sınıf</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for student in students %}
+      <tr>
+        <td>{{ student.name }}</td>
+        <td>{{ student.student_number }}</td>
+        <td>{{ student.class_name }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="3">Kayıtlı öğrenci bulunmuyor.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

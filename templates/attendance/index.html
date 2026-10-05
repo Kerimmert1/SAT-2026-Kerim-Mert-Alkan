@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Giriş - Çıkış ve Devamsızlık Kayıtları - TR3MX{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Giriş - Çıkış ve Devamsızlık Kayıtları</h3>
+        <p class="text-muted small mb-0">Tüm personelin ve öğrencilerin günlük katılım ve devamsızlık hareketleri</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        {% if session.get('user_role') == 'admin' %}
+            <button type="button" class="btn btn-primary-gradient btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#manualAttendanceModal">
+                <i class="fas fa-plus me-1"></i> Manuel Kayıt Ekle
+            </button>
+        {% endif %}
+        <a href="{{ url_for('export_attendances') }}" class="btn btn-success btn-sm rounded-pill text-white">
+            <i class="fas fa-file-excel me-1"></i> Excel / CSV Aktar
+        </a>
+    </div>
+</div>
+
+<!-- FİLTRE VE ARAMA KARTI -->
+<div class="content-card mb-4">
+    <div class="card-body p-3">
+        <form action="{{ url_for('attendances_list') }}" method="GET" class="row g-2 align-items-center">
+            <div class="col-12 col-md-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-body-tertiary"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Ad, Numara, Bölüm..." value="{{ search_query }}">
+                </div>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <input type="date" name="date" class="form-control form-control-sm" value="{{ date_filter }}" title="Tarihe Göre Filtrele">
+            </div>
+
+            <div class="col-6 col-md-2">
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">Tüm Durumlar</option>
+                    <option value="Zamanında" {% if status_filter == 'Zamanında' %}selected{% endif %}>Zamanında</option>
+                    <option value="Geç Kaldı" {% if status_filter == 'Geç Kaldı' %}selected{% endif %}>Geç Kaldı</option>
+                    <option value="Gelmedi" {% if status_filter == 'Gelmedi' %}selected{% endif %}>Gelmedi (Devamsız)</option>
+                    <option value="İzinli" {% if status_filter == 'İzinli' %}selected{% endif %}>İzinli</option>
+                    <option value="Erken Çıktı" {% if status_filter == 'Erken Çıktı' %}selected{% endif %}>Erken Çıktı</option>
+                </select>
+            </div>
+
+            {% if session.get('user_role') == 'admin' %}
+            <div class="col-6 col-md-2">
+                <select name="role" class="form-select form-select-sm">
+                    <option value="">Tüm Roller</option>
+                    <option value="personel" {% if role_filter == 'personel' %}selected{% endif %}>Personel / Öğretim Üyesi</option>
+                    <option value="ogrenci" {% if role_filter == 'ogrenci' %}selected{% endif %}>Öğrenci</option>
+                </select>
+            </div>
+            {% endif %}
+
+            <div class="col-6 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm rounded-3 flex-grow-1">
+                    <i class="fas fa-filter me-1"></i> Filtrele
+                </button>
+                <a href="{{ url_for('attendances_list') }}" class="btn btn-outline-secondary btn-sm rounded-3" title="Sıfırla">
+                    <i class="fas fa-rotate-left"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- KAYITLAR TABLOSU -->
+<div class="content-card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr class="small text-muted">
+                        <th class="ps-3">Tarih</th>
+                        <th>Kullanıcı</th>
+                        <th>Departman / Sınıf</th>
+                        <th>Giriş Saati</th>
+                        <th>Çıkış Saati</th>
+                        <th>Durum</th>
+                        <th>Not & Cihaz</th>
+                        {% if session.get('user_role') == 'admin' %}
+                            <th class="text-end pe-3">İşlem</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                        <tr>
+                            <td class="ps-3 fw-bold small text-nowrap">
+                                <i class="far fa-calendar text-muted me-1"></i>
+                                {{ record.date }}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 0.8rem; background-color: {{ record.avatar_color }};">
+                                        {{ record.user_name[:1] }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold small">{{ record.user_name }}</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">{{ record.user_code }} &bull; {{ record.user_role|upper }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="small">{{ record.department }}</td>
+                            <td class="small fw-semibold">
+                                {% if record.check_in_time %}
+                                    <span class="text-success"><i class="fas fa-arrow-down-left me-1"></i>{{ record.check_in_time }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">
+                                {% if record.check_out_time %}
+                                    <span class="text-warning-emphasis"><i class="fas fa-arrow-up-right me-1"></i>{{ record.check_out_time }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if record.status == 'Zamanında' %}
+                                    <span class="badge-status status-on-time"><i class="fas fa-check"></i> Zamanında</span>
+                                {% elif record.status == 'Geç Kaldı' %}
+                                    <span class="badge-status status-late"><i class="fas fa-clock"></i> Geç Kaldı</span>
+                                {% elif record.status == 'Gelmedi' %}
+                                    <span class="badge-status status-absent"><i class="fas fa-xmark"></i> Gelmedi</span>
+                                {% elif record.status == 'İzinli' %}
+                                    <span class="badge-status status-leave"><i class="fas fa-umbrella-beach"></i> İzinli</span>
+                                {% elif record.status == 'Erken Çıktı' %}
+                                    <span class="badge-status status-early-leave"><i class="fas fa-person-walking-arrow-right"></i> Erken Çıktı</span>
+                                {% else %}
+                                    <span class="badge-status status-pending">{{ record.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted" style="max-width: 220px;">
+                                <div class="text-truncate" title="{{ record.notes }}">{{ record.notes or '-' }}</div>
+                                <div class="text-white-50" style="font-size: 0.68rem;">{{ record.device_info or '' }}</div>
+                            </td>
+                            {% if session.get('user_role') == 'admin' %}
+                                <td class="text-end pe-3">
+                                    <form action="{{ url_for('delete_attendance', record_id=record.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu devamsızlık/giriş kaydını silmek istediğinize emin misiniz?');">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm p-1 rounded-2" title="Kaydı Sil">
+                                            <i class="fas fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="{% if session.get('user_role') == 'admin' %}8{% else %}7{% endif %}" class="text-center py-5 text-muted">
+                                <i class="fas fa-folder-open fa-2x mb-2 text-secondary opacity-50"></i>
+                                <div>Belirtilen kriterlere uygun giriş-çıkış veya devamsızlık kaydı bulunamadı.</div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- YÖNETİCİ MANUEL KAYIT EKLEME MODALI -->
+{% if session.get('user_role') == 'admin' %}
+<div class="modal fade" id="manualAttendanceModal" tabindex="-1" aria-labelledby="manualAttendanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="manualAttendanceModalLabel">
+                    <i class="fas fa-pen-to-square text-primary me-2"></i> Manuel Devamsızlık / Giriş Kaydı
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('manual_attendance_create') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Kullanıcı (Personel / Öğrenci)</label>
+                        <select name="user_id" class="form-select" required>
+                            <option value="">Seçiniz...</option>
+                            {% for u in users %}
+                                <option value="{{ u.id }}">{{ u.name }} ({{ u.user_code }} - {{ u.role|upper }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Tarih</label>
+                            <input type="date" name="date" class="form-control" value="{{ today_iso }}" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Durum</label>
+                            <select name="status" class="form-select" required>
+                                <option value="Zamanında">Zamanında</option>
+                                <option value="Geç Kaldı">Geç Kaldı</option>
+                                <option value="Gelmedi">Gelmedi (Devamsız)</option>
+                                <option value="İzinli">İzinli</option>
+                                <option value="Erken Çıktı">Erken Çıktı</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Giriş Saati (Opsiyonel)</label>
+                            <input type="time" name="check_in_time" class="form-control" step="1">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Çıkış Saati (Opsiyonel)</label>
+                            <input type="time" name="check_out_time" class="form-control" step="1">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Açıklama / Mazeret Notu</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="Gecikme nedeni veya manuel onay gerekçesi..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary-gradient px-4">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Profil ve Güvenlik Ayarları - TR3MX{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Hesap ve Güvenlik Ayarları</h3>
+                <p class="text-muted small mb-0">İletişim bilgilerinizi güncelleyin ve hesap şifrenizi değiştirin</p>
+            </div>
+            <div class="avatar-circle" style="width: 48px; height: 48px; font-size: 1.2rem; background-color: {{ user.avatar_color }};">
+                {{ user.name[:1] }}
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="card-body p-4">
+                <form action="{{ url_for('profile') }}" method="POST">
+                    <!-- Sabit Bilgiler -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Ad Soyad</label>
+                            <input type="text" class="form-control bg-body-tertiary" value="{{ user.name }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Kullanıcı Numarası / Kod</label>
+                            <input type="text" class="form-control bg-body-tertiary" value="{{ user.user_code }}" disabled>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">E-Posta</label>
+                            <input type="email" class="form-control bg-body-tertiary" value="{{ user.email }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Telefon Numarası</label>
+                            <input type="text" name="phone" class="form-control" value="{{ user.phone or '' }}" placeholder="05XX XXX XX XX">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Rol</label>
+                            <input type="text" class="form-control bg-body-tertiary" value="{{ user.role|upper }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Bölüm / Departman</label>
+                            <input type="text" class="form-control bg-body-tertiary" value="{{ user.department or '-' }}" disabled>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Şifre Değiştirme -->
+                    <h6 class="fw-bold mb-3 text-primary"><i class="fas fa-key me-2"></i> Şifre Değiştir (İsteğe Bağlı)</h6>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Mevcut Şifreniz</label>
+                        <input type="password" name="current_password" class="form-control" placeholder="Mevcut şifreniz">
+                        <div class="form-text small">Şifrenizi değiştirmek istemiyorsanız bu alanları boş bırakınız.</div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Yeni Şifre</label>
+                            <input type="password" name="new_password" class="form-control" placeholder="Yeni şifreniz">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Yeni Şifre (Tekrar)</label>
+                            <input type="password" name="confirm_password" class="form-control" placeholder="Yeni şifrenizi tekrar yazın">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary-gradient px-4 py-2">
+                            <i class="fas fa-save me-1"></i> Bilgileri Güncelle
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

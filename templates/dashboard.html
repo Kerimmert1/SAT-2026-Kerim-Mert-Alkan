@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Yönetici Panosu</h2>
+<p class="small">Tarih: {{ today }}</p>
+
+<div class="grid">
+  <div class="card">
+    <h3>Toplam Öğrenci</h3>
+    <strong>{{ total_students }}</strong>
+  </div>
+  <div class="card">
+    <h3>Var</h3>
+    <strong>{{ total_present }}</strong>
+  </div>
+  <div class="card">
+    <h3>Yok</h3>
+    <strong>{{ total_absent }}</strong>
+  </div>
+  <div class="card">
+    <h3>Geç Kaldı</h3>
+    <strong>{{ total_late }}</strong>
+  </div>
+</div>
+
+<div class="panel" style="margin-top:20px;">
+  <h3>Son Kayıtlar</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Öğrenci</th>
+        <th>Numara</th>
+        <th>Sınıf</th>
+        <th>Tarih</th>
+        <th>Durum</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in recent %}
+      <tr>
+        <td>{{ row.name }}</td>
+        <td>{{ row.student_number }}</td>
+        <td>{{ row.class_name }}</td>
+        <td>{{ row.date }}</td>
+        <td>{{ row.status }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="5">Henüz yoklama kaydı bulunmuyor.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Kullanıcı ve Personel Yönetimi - TR3MX{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Kullanıcı & Öğrenci / Personel Yönetimi</h3>
+        <p class="text-muted small mb-0">Sistemdeki tüm kayıtlı kişiler, roller, devamsızlık limitleri ve risk takibi</p>
+    </div>
+    <div>
+        <a href="{{ url_for('user_create') }}" class="btn btn-primary-gradient btn-sm rounded-pill">
+            <i class="fas fa-user-plus me-1"></i> Yeni Kullanıcı Kaydet
+        </a>
+    </div>
+</div>
+
+<!-- FİLTRE VE ARAMA -->
+<div class="content-card mb-4">
+    <div class="card-body p-3">
+        <form action="{{ url_for('users_list') }}" method="GET" class="row g-2 align-items-center">
+            <div class="col-12 col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-body-tertiary"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Ad, Numara, E-Posta..." value="{{ search }}">
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <select name="role" class="form-select form-select-sm">
+                    <option value="">Tüm Roller</option>
+                    <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Yönetici (Admin)</option>
+                    <option value="personel" {% if role_filter == 'personel' %}selected{% endif %}>Personel / Öğretim Üyesi</option>
+                    <option value="ogrenci" {% if role_filter == 'ogrenci' %}selected{% endif %}>Öğrenci</option>
+                </select>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <select name="department" class="form-select form-select-sm">
+                    <option value="">Tüm Bölümler / Departmanlar</option>
+                    {% for d in departments %}
+                        <option value="{{ d['department'] }}" {% if department_filter == d['department'] %}selected{% endif %}>
+                            {{ d['department'] }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm rounded-3 flex-grow-1">
+                    <i class="fas fa-filter me-1"></i> Filtrele
+                </button>
+                <a href="{{ url_for('users_list') }}" class="btn btn-outline-secondary btn-sm rounded-3" title="Sıfırla">
+                    <i class="fas fa-rotate-left"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- KULLANICI LİSTESİ -->
+<div class="content-card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr class="small text-muted">
+                        <th class="ps-3">No / Kod</th>
+                        <th>Kullanıcı Bilgisi</th>
+                        <th>Rol</th>
+                        <th>Bölüm / Departman</th>
+                        <th>Devamsızlık Durumu</th>
+                        <th>İzin Durumu</th>
+                        <th class="text-end pe-3">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                        {% set pct = ((u.absence_count / u.max_absence_limit) * 100)|round(1) if u.max_absence_limit > 0 else 0 %}
+                        <tr>
+                            <td class="ps-3 fw-bold small text-nowrap">
+                                <span class="badge bg-body-secondary text-body border">{{ u.user_code }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar-circle" style="width: 34px; height: 34px; font-size: 0.85rem; background-color: {{ u.avatar_color }};">
+                                        {{ u.name[:1] }}
+                                    </div>
+                                    <div>
+                                        <a href="{{ url_for('user_detail', user_id=u.id) }}" class="fw-bold small text-decoration-none text-body">
+                                            {{ u.name }}
+                                        </a>
+                                        <div class="text-muted" style="font-size: 0.72rem;">{{ u.email }} &bull; {{ u.phone or '-' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if u.role == 'admin' %}
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Yönetici</span>
+                                {% elif u.role == 'personel' %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Personel</span>
+                                {% else %}
+                                    <span class="badge bg-purple-subtle text-purple border" style="color: #8b5cf6; border-color: #ddd6fe;">Öğrenci</span>
+                                {% endif %}
+                            </td>
+                            <td class="small">
+                                <div>{{ u.department }}</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">{{ u.title or '' }}</div>
+                            </td>
+                            <td>
+                                {% if u.role != 'admin' %}
+                                    <div style="min-width: 130px;">
+                                        <div class="d-flex justify-content-between small mb-1" style="font-size: 0.75rem;">
+                                            <span><strong>{{ u.absence_count }}</strong> / {{ u.max_absence_limit|int }} Gün</span>
+                                            <span class="{% if pct >= 75 %}text-danger fw-bold{% elif pct >= 50 %}text-warning fw-bold{% else %}text-muted{% endif %}">
+                                                %{{ pct }}
+                                            </span>
+                                        </div>
+                                        <div class="progress" style="height: 5px;">
+                                            <div class="progress-bar {% if pct >= 75 %}bg-danger{% elif pct >= 50 %}bg-warning{% else %}bg-primary{% endif %}" 
+                                                 role="progressbar" style="width: {{ pct }}%"></div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="small">
+                                {% if u.role != 'admin' %}
+                                    <span class="text-muted">{{ u.approved_leaves|int }} / {{ u.total_leave_days|int }} Gün</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-3">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('user_detail', user_id=u.id) }}" class="btn btn-outline-secondary" title="Detaylı Karne & Geçmiş">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('user_edit', user_id=u.id) }}" class="btn btn-outline-primary" title="Düzenle">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    {% if u.id != session.get('user_id') %}
+                                        <form action="{{ url_for('user_delete', user_id=u.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Bu kullanıcıyı ve tüm devamsızlık/izin geçmişini silmek istediğinize emin misiniz?');">
+                                            <button type="submit" class="btn btn-outline-danger" title="Sil">
+                                                <i class="fas fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fas fa-user-slash fa-2x mb-2 text-secondary opacity-50"></i>
+                                <div>Arama kriterlerine uygun kullanıcı bulunamadı.</div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

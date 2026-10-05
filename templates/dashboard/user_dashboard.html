@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Kullanıcı Kontrol Paneli - TR3MX{% endblock %}
+
+{% block content %}
+<!-- HOŞ GELDİNİZ VE CANLI SAAT BAŞLIĞI -->
+<div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Merhaba, {{ user.name }} 👋</h3>
+        <p class="text-muted small mb-0">{{ user.title or 'Kullanıcı' }} &bull; {{ user.department }} &bull; No: <span class="fw-semibold">{{ user.user_code }}</span></p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('request_leave') }}" class="btn btn-primary-gradient btn-sm rounded-pill">
+            <i class="fas fa-paper-plane me-1"></i> İzin / Mazeret Bildir
+        </a>
+    </div>
+</div>
+
+<!-- GİRİŞ / ÇIKIŞ CANLI HERO KARTI -->
+<div class="content-card mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff;">
+    <div class="card-body p-4 p-md-5">
+        <div class="row align-items-center g-4">
+            <div class="col-12 col-md-7">
+                <span class="badge bg-indigo-subtle text-white border border-light-subtle mb-3 px-3 py-1">
+                    <i class="far fa-calendar-check me-1"></i> Bugün: {{ today_str }}
+                </span>
+                <h1 class="display-5 fw-bold mb-2 live-clock font-monospace">--:--:--</h1>
+                <p class="text-white-50 mb-4" style="max-width: 480px;">
+                    Kurum mesai/ders başlangıç saati: <strong>{{ system_settings.work_start_time }}</strong> (Tolerans: {{ system_settings.late_tolerance_minutes }} dk).
+                    Zamanında giriş yaparak devamsızlık durumunuzu koruyunuz.
+                </p>
+
+                <!-- Giriş / Çıkış Durum Butonları -->
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    {% if not today_record or not today_record.check_in_time %}
+                        <!-- HENÜZ GİRİŞ YAPILMADI -->
+                        <form action="{{ url_for('check_in') }}" method="POST">
+                            <button type="submit" class="btn btn-check-in d-inline-flex align-items-center gap-2">
+                                <i class="fas fa-right-to-bracket fs-4"></i>
+                                <span>Giriş Yap (Şimdi)</span>
+                            </button>
+                        </form>
+                        <span class="text-white-50 small">
+                            <i class="fas fa-circle-info me-1"></i> Henüz giriş kaydınız bulunmuyor.
+                        </span>
+
+                    {% elif today_record.check_in_time and not today_record.check_out_time %}
+                        <!-- GİRİŞ YAPILDI, ÇIKIŞ BEKLENİYOR -->
+                        <form action="{{ url_for('check_out') }}" method="POST">
+                            <button type="submit" class="btn btn-check-out d-inline-flex align-items-center gap-2">
+                                <i class="fas fa-person-walking-arrow-right fs-4"></i>
+                                <span>Çıkış Yap</span>
+                            </button>
+                        </form>
+                        <div class="text-white small">
+                            <div class="fw-semibold text-success"><i class="fas fa-check-circle me-1"></i> Giriş Yapıldı: {{ today_record.check_in_time }}</div>
+                            <div class="text-white-50">Durum: {{ today_record.status }}</div>
+                        </div>
+
+                    {% else %}
+                        <!-- GİRİŞ VE ÇIKIŞ TAMAMLANDI -->
+                        <div class="alert alert-light bg-white text-dark py-3 px-4 rounded-4 shadow-sm border-0 d-inline-flex align-items-center gap-3 mb-0">
+                            <div class="rounded-circle p-2 bg-success text-white">
+                                <i class="fas fa-circle-check fs-4"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Bugünkü Katılımınız Tamamlandı!</div>
+                                <div class="text-muted small">
+                                    Giriş: <strong>{{ today_record.check_in_time }}</strong> &bull; 
+                                    Çıkış: <strong>{{ today_record.check_out_time }}</strong> &bull; 
+                                    Durum: <span class="badge bg-success">{{ today_record.status }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sağ Taraf: Hızlı Özet Kartı -->
+            <div class="col-12 col-md-5">
+                <div class="p-3 rounded-4" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);">
+                    <h6 class="fw-bold text-white mb-3"><i class="fas fa-shield-heart me-2 text-warning"></i> Devamsızlık & İzin Durumunuz</h6>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span class="text-white-50">Devamsızlık Limiti ({{ user.max_absence_limit|int }} Gün)</span>
+                            <span class="fw-bold text-white">{{ absence_count }} Gün Kullanıldı</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar {% if absence_limit_percent >= 75 %}bg-danger{% elif absence_limit_percent >= 50 %}bg-warning{% else %}bg-success{% endif %}" 
+                                 role="progressbar" style="width: {{ absence_limit_percent }}%"></div>
+                        </div>
+                        <div class="text-end mt-1" style="font-size: 0.72rem;">
+                            <span class="text-white-50">Kalan Devamsızlık Hakkı: </span>
+                            <strong class="{% if user.max_absence_limit - absence_count <= 3 %}text-danger{% else %}text-white{% endif %}">
+                                {{ (user.max_absence_limit - absence_count)|int }} Gün
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-top border-light-subtle d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-white-50 small">Kalan Yıllık/Mazeret İzni</div>
+                            <h4 class="fw-bold text-white mb-0">{{ remaining_leave_days|int }} Gün</h4>
+                        </div>
+                        <a href="{{ url_for('request_leave') }}" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                            İzin İste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KULLANICI İSTATİSTİK KARTLARI -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <span class="text-muted small fw-semibold">Devamsız Günler</span>
+            <h2 class="fw-bold text-danger my-2">{{ absence_count }}</h2>
+            <div class="text-muted small">Maksimum {{ user.max_absence_limit|int }} Gün</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <span class="text-muted small fw-semibold">Geç Kalma Sayısı</span>
+            <h2 class="fw-bold text-warning my-2">{{ late_count }}</h2>
+            <div class="text-muted small">Toplam Gecikmeler</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <span class="text-muted small fw-semibold">Kullanılan İzin</span>
+            <h2 class="fw-bold text-primary my-2">{{ used_leave_days|int }}</h2>
+            <div class="text-muted small">Onaylanmış İzin Günü</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <span class="text-muted small fw-semibold">Kalan İzin Hakkı</span>
+            <h2 class="fw-bold text-success my-2">{{ remaining_leave_days|int }}</h2>
+            <div class="text-muted small">Yıllık / Hak Bakiye</div>
+        </div>
+    </div>
+</div>
+
+<!-- GEÇMİŞ HAREKETLER & İZİN TALEPLERİM -->
+<div class="row g-4">
+    <!-- Son Giriş-Çıkış Hareketlerim -->
+    <div class="col-12 col-lg-7">
+        <div class="content-card h-100">
+            <div class="card-header">
+                <div>
+                    <h6 class="fw-bold mb-0">Son Giriş-Çıkış Hareketlerim</h6>
+                    <span class="text-muted small">Katılım sağlanan son günler ve saat detayları</span>
+                </div>
+                <a href="{{ url_for('attendances_list') }}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                    Tümü &rarr;
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="small text-muted">
+                                <th class="ps-3">Tarih</th>
+                                <th>Giriş Saati</th>
+                                <th>Çıkış Saati</th>
+                                <th>Durum</th>
+                                <th class="pe-3">Not</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in attendance_history %}
+                                <tr>
+                                    <td class="ps-3 fw-semibold small">{{ row.date }}</td>
+                                    <td class="small">{{ row.check_in_time if row.check_in_time else '-' }}</td>
+                                    <td class="small text-muted">{{ row.check_out_time if row.check_out_time else '-' }}</td>
+                                    <td>
+                                        {% if row.status == 'Zamanında' %}
+                                            <span class="badge-status status-on-time"><i class="fas fa-check"></i> Zamanında</span>
+                                        {% elif row.status == 'Geç Kaldı' %}
+                                            <span class="badge-status status-late"><i class="fas fa-clock"></i> Geç</span>
+                                        {% elif row.status == 'Gelmedi' %}
+                                            <span class="badge-status status-absent"><i class="fas fa-xmark"></i> Gelmedi</span>
+                                        {% elif row.status == 'İzinli' %}
+                                            <span class="badge-status status-leave"><i class="fas fa-umbrella-beach"></i> İzinli</span>
+                                        {% else %}
+                                            <span class="badge-status status-early-leave">{{ row.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="pe-3 small text-muted text-truncate" style="max-width: 140px;">
+                                        {{ row.notes or '-' }}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted small">
+                                        Henüz kaydedilmiş bir hareket bulunmuyor.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İzin Taleplerimin Durumu -->
+    <div class="col-12 col-lg-5">
+        <div class="content-card h-100">
+            <div class="card-header">
+                <div>
+                    <h6 class="fw-bold mb-0">İzin ve Mazeret Taleplerim</h6>
+                    <span class="text-muted small">Yönetici onayı bekleyen ve sonuçlanan talepler</span>
+                </div>
+                <a href="{{ url_for('request_leave') }}" class="btn btn-outline-primary btn-sm rounded-pill">
+                    <i class="fas fa-plus"></i> Talep Aç
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for l in user_leaves %}
+                        <div class="list-group-item p-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold small">{{ l.leave_type }}</span>
+                                {% if l.status == 'Onaylandı' %}
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="fas fa-check"></i> Onaylandı</span>
+                                {% elif l.status == 'Reddedildi' %}
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="fas fa-times"></i> Reddedildi</span>
+                                {% else %}
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="fas fa-hourglass-half"></i> Beklemede</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-muted small">
+                                <i class="far fa-calendar me-1"></i> {{ l.start_date }} &rarr; {{ l.end_date }} ({{ l.days_count|int }} Gün)
+                            </div>
+                            <div class="small text-secondary mt-1 fst-italic">
+                                "{{ l.reason }}"
+                            </div>
+                            {% if l.admin_note %}
+                                <div class="alert alert-secondary py-1 px-2 mt-2 mb-0 small" style="font-size: 0.75rem;">
+                                    <strong>Yönetici Notu:</strong> {{ l.admin_note }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted small">
+                            Henüz oluşturulmuş bir izin veya mazeret talebiniz bulunmamaktadır.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
