@@ -82,7 +82,7 @@ Projenin geliştirilmesinde Flask web frameworkü kullanılmıştır. Flask, haf
 ## Proje Yapısı
 
 ```text
-satproje/
+SAT-2026-Kerim-Mert-Alkan/
 ├── app.py
 ├── database.py
 ├── requirements.txt
