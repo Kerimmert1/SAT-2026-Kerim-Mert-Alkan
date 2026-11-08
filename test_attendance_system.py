@@ -1,4 +1,5 @@
 from app import create_app
+from database import get_db
 
 
 def test_login_redirects_and_dashboard_loads():
@@ -37,3 +38,23 @@ def test_student_attendance_record_can_be_created():
     )
 
     assert attendance_response.status_code == 302
+
+
+def test_invalid_attendance_date_is_rejected_without_saving():
+    app = create_app({"TESTING": True, "DB_PATH": ":memory:"})
+    client = app.test_client()
+
+    client.post("/login", data={"username": "admin", "password": "admin123"})
+    response = client.post(
+        "/attendance/mark",
+        data={"student_id": "1", "status": "Var", "date": "2026-99-99"},
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert "Geçerli bir tarih girmeniz gerekiyor." in response.get_data(as_text=True)
+
+    conn = get_db()
+    attendance_count = conn.execute("SELECT COUNT(*) FROM attendance").fetchone()[0]
+    conn.close()
+    assert attendance_count == 0

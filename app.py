@@ -172,6 +172,16 @@ def create_app(test_config=None):
         date_value = request.form.get('date') or date.today().isoformat()
         note = request.form.get('note', '').strip()
 
+        try:
+            parsed_date = date.fromisoformat(date_value)
+        except ValueError:
+            parsed_date = None
+
+        if not parsed_date or parsed_date.isoformat() != date_value:
+            today = date.today().isoformat()
+            flash('Geçerli bir tarih girmeniz gerekiyor.', 'warning')
+            return redirect(url_for('attendance_records', date=today))
+
         if not student_id or status not in ('Var', 'Yok', 'Geç Kaldı'):
             flash('Öğrenci ve durum seçimi zorunludur.', 'warning')
             return redirect(url_for('attendance_records', date=date_value))

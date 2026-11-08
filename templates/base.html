@@ -5,35 +5,143 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Öğrenci Devamsızlık Takip Sistemi{% endblock %}</title>
     <style>
-      body { margin: 0; font-family: Arial, sans-serif; background: #f3f4f6; color: #111827; }
-      .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
-      .topbar { background: #2563eb; color: white; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
-      .nav { display: flex; gap: 16px; flex-wrap: wrap; }
-      .nav a { color: white; text-decoration: none; font-weight: 600; }
-      .panel { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-top: 20px; }
-      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-top: 16px; }
-      .card { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px; }
-      .card h3 { margin: 0 0 8px; color: #6b7280; font-size: 14px; }
-      .card strong { font-size: 28px; }
-      form { display: grid; gap: 12px; }
+      :root {
+        color-scheme: light;
+        --ink: #203331;
+        --muted: #687976;
+        --surface: rgba(255, 255, 255, 0.94);
+        --line: #dce6e2;
+        --green: #17645b;
+        --green-deep: #123f3c;
+        --amber: #c57d3d;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+        color: var(--ink);
+        background-color: #f0f5f2;
+        background-image:
+          linear-gradient(125deg, rgba(23, 100, 91, 0.08), transparent 46%),
+          linear-gradient(315deg, rgba(197, 125, 61, 0.07), transparent 40%),
+          repeating-linear-gradient(0deg, transparent 0 35px, rgba(32, 71, 66, 0.025) 35px 36px),
+          repeating-linear-gradient(90deg, transparent 0 35px, rgba(32, 71, 66, 0.025) 35px 36px);
+        background-attachment: fixed;
+      }
+      .container { width: min(1160px, 100%); margin: 0 auto; padding: 32px 24px 48px; }
+      .topbar {
+        min-height: 68px;
+        padding: 12px max(24px, calc((100vw - 1160px) / 2));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        color: #f5faf7;
+        background: linear-gradient(105deg, var(--green-deep), #1b655b);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 8px 24px rgba(18, 63, 60, 0.16);
+      }
+      .topbar strong { font-size: 16px; font-weight: 700; }
+      .nav { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+      .nav a {
+        padding: 9px 12px;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        color: rgba(245, 250, 247, 0.78);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+      }
+      .nav a:hover, .nav a:focus-visible {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+      .panel {
+        margin-top: 20px;
+        padding: 22px;
+        overflow-x: auto;
+        background: var(--surface);
+        border: 1px solid rgba(207, 221, 215, 0.9);
+        border-radius: 8px;
+        box-shadow: 0 12px 30px rgba(33, 65, 58, 0.07);
+        backdrop-filter: blur(8px);
+      }
+      .panel > h2, .panel > h3 { margin-top: 0; }
+      .panel > h2 { font-size: 22px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-top: 18px; }
+      .card {
+        position: relative;
+        overflow: hidden;
+        padding: 18px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(33, 65, 58, 0.045);
+      }
+      .card::before { content: ''; position: absolute; inset: 0 0 auto; height: 3px; background: var(--green); }
+      .card:nth-child(2)::before { background: #4b8d75; }
+      .card:nth-child(3)::before { background: var(--amber); }
+      .card:nth-child(4)::before { background: #b95e55; }
+      .card h3 { margin: 0 0 8px; color: var(--muted); font-size: 13px; font-weight: 600; }
+      .card strong { font-size: 30px; font-weight: 700; }
+      form { display: grid; gap: 14px; }
+      label { display: inline-block; margin-bottom: 6px; color: #405450; font-size: 13px; font-weight: 600; }
       input, select, textarea, button { font: inherit; }
-      input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; }
+      input, select, textarea {
+        width: 100%;
+        padding: 11px 12px;
+        color: var(--ink);
+        background: #fff;
+        border: 1px solid #cbd9d4;
+        border-radius: 6px;
+        transition: border-color 150ms ease, box-shadow 150ms ease;
+      }
+      input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--green);
+        box-shadow: 0 0 0 3px rgba(23, 100, 91, 0.12);
+      }
       button { cursor: pointer; }
-      .btn { display: inline-block; padding: 10px 16px; border: none; border-radius: 8px; text-decoration: none; font-weight: 600; }
-      .btn-primary { background: #2563eb; color: white; }
-      .btn-success { background: #16a34a; color: white; }
-      .btn-warning { background: #f59e0b; color: #111827; }
-      .btn-danger { background: #dc2626; color: white; }
-      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-      th, td { padding: 12px 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
-      th { background: #f8fafc; }
-      .flash { margin: 16px 0; padding: 12px 14px; border-radius: 8px; font-weight: 600; }
-      .flash.success { background: #dcfce7; color: #166534; }
-      .flash.warning { background: #fef3c7; color: #92400e; }
-      .flash.danger { background: #fee2e2; color: #991b1b; }
-      .flash.info { background: #dbeafe; color: #1d4ed8; }
-      .small { color: #6b7280; font-size: 13px; }
+      .btn {
+        display: inline-block;
+        padding: 10px 16px;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 150ms ease, filter 150ms ease;
+      }
+      .btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+      .btn-primary { color: #fff; background: var(--green); }
+      .btn-success { color: #fff; background: #347653; }
+      .btn-warning { color: #332514; background: #e6b35e; }
+      .btn-danger { color: #fff; background: #ae4c45; }
+      table { width: 100%; min-width: 540px; margin-top: 12px; border-collapse: collapse; }
+      th, td { padding: 13px 12px; border-bottom: 1px solid #e5ece9; text-align: left; }
+      th { color: #50635f; background: #f3f7f5; font-size: 12px; font-weight: 700; }
+      tbody tr:hover { background: rgba(23, 100, 91, 0.035); }
+      .flash { margin: 16px 0; padding: 12px 14px; border: 1px solid transparent; border-radius: 6px; font-weight: 600; }
+      .flash.success { color: #205a3d; background: #e7f3eb; border-color: #c9e2d1; }
+      .flash.warning { color: #76521f; background: #fff4dc; border-color: #f0dfb8; }
+      .flash.danger { color: #843e39; background: #fae9e7; border-color: #edcfcb; }
+      .flash.info { color: #285d59; background: #e7f1ef; border-color: #cce0dc; }
+      .small { color: var(--muted); font-size: 13px; line-height: 1.6; }
       .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+      @media (max-width: 640px) {
+        .topbar { align-items: flex-start; flex-direction: column; gap: 10px; padding: 14px 18px; }
+        .nav { width: 100%; gap: 2px; }
+        .nav a { padding: 8px 10px; }
+        .container { padding: 20px 16px 32px; }
+        .panel { padding: 17px; }
+        .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .card { padding: 15px; }
+        .card strong { font-size: 26px; }
+      }
+      @media (max-width: 380px) { .grid { grid-template-columns: 1fr; } }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; } }
     </style>
   </head>
   <body>
