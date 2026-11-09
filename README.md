@@ -1,109 +1,140 @@
 # Öğrenci Devamsızlık Takip Sistemi
 
-Sistem analizi ve tasarım dersi için hazırlanmış, sade ve anlaşılır bir öğrenci devamsızlık takip uygulamasıdır. Bu proje, öğretmenin gün içinde öğrencilerin yoklama durumunu hızlı ve düzenli bir şekilde kaydetmesini, öğrenci listesini yönetmesini ve devamsızlık bilgilerini takip etmesini amaçlar. Gereksiz özelliklerden arındırılmış bir yapıya sahip olması sayesinde hem öğrenme sürecine uygun hem de kullanımı kolay bir uygulama olarak tasarlanmıştır.
-
-## Proje Hakkında
-
-Bu sistem, okul veya ders ortamında kullanılabilecek temel bir yoklama yönetim çözümüdür. Öğretmen, kullanıcı girişi ile sisteme erişerek öğrenci ekleyebilir, yeni ders veya gün için yoklama kaydı oluşturabilir ve her öğrencinin durumunu "Var", "Yok" veya "Geç Kaldı" şeklinde işleyebilir. Tüm veriler yerel SQLite veritabanında saklanır; bu sayede ek bir sunucu kurulumu gerektirmez ve proje daha hafif bir yapıya sahip olur. Ayrıca uygulama arayüzü sade tutulmuş, ana işlevler öne çıkarılmıştır.
+Sistem Analizi ve Tasarım dersi kapsamında geliştirilmiş, sade ve anlaşılır bir öğrenci devamsızlık takip web uygulamasıdır. Öğretmenin günlük yoklama işlemlerini hızlı ve düzenli bir şekilde yapabilmesi, öğrenci listesini yönetebilmesi ve devamsızlık verilerini takip edebilmesi amacıyla tasarlanmıştır.
 
 ## Özellikler
 
-- Yönetici girişi ve güvenli oturum yönetimi
-- Öğrenci ekleme ve listeleme
-- Günlük yoklama kaydı
-- Devamsızlık ve geç kalma takibi
-- Anasayfa görünümünde toplam öğrenci ve durum istatistikleri
-- SQLite tabanlı veri saklama
-- Basit ve anlaşılır kullanıcı arayüzü
+- Yönetici girişi ve güvenli oturum yönetimi (Flask session + hash'lenmiş şifre)
+- Öğrenci ekleme ve listeleme (öğrenci no, ad soyad, sınıf)
+- Günlük yoklama kaydı: **Var**, **Yok**, **Geç Kaldı** durumları
+- Tarih bazlı yoklama görüntüleme ve not ekleme
+- Anasayfa istatistikleri: toplam öğrenci, gün içi yok/geç kalan/var sayıları
+- SQLite tabanlı veri saklama (ek sunucu gerektirmez)
+- Sağlık kontrolü endpoint'i (`/health`) ve otomatik testler
 
 ## Teknolojiler
 
-- Python
-- Flask
-- SQLite
-- Jinja2
-- HTML / CSS / JavaScript
+| Katman      | Teknoloji            |
+| ----------- | -------------------- |
+| Backend     | Python, Flask        |
+| Veritabanı  | SQLite               |
+| Şablon      | Jinja2               |
+| Arayüz      | HTML, CSS, JavaScript |
+| Güvenlik    | Werkzeug (password hashing), Flask session |
 
 ## Kurulum
 
-1. Proje klasörüne gidin:
+1. Projeyi klonlayın:
    ```bash
-   cd satproje
+   git clone https://github.com/Kerimmert1/SAT-2026-Kerim-Mert-Alkan.git
+   cd SAT-2026-Kerim-Mert-Alkan
    ```
 
-2. Sanal ortam oluşturun:
+2. Sanal ortam oluşturun ve etkinleştirin:
    ```bash
    python -m venv .venv
+   .venv\Scripts\activate        # Windows
+   # source .venv/bin/activate   # macOS / Linux
    ```
 
-3. Sanal ortamı etkinleştirin:
+3. Bağımlılıkları yükleyin:
    ```bash
-   .venv\Scripts\activate
+   pip install -r requirements.txt
    ```
 
-4. Bağımlılıkları yükleyin:
-   ```bash
-   python -m pip install -r requirements.txt
-   ```
-
-5. Uygulamayı çalıştırın:
+4. Uygulamayı çalıştırın:
    ```bash
    python app.py
    ```
 
-6. Tarayıcıda şu adresi açın:
+5. Tarayıcıda açın:
    ```text
    http://127.0.0.1:5000/login
    ```
 
 ## Giriş Bilgileri
 
-- Kullanıcı adı: admin
-- Şifre: admin123
+| Kullanıcı | Şifre      |
+| --------- | ---------- |
+| `admin`   | `admin123` |
+
+> **Not:** Bu bilgiler yalnızca geliştirme/test amaçlıdır. Üretim ortamında `SECRET_KEY` ortam değişkenini ve yönetici şifresini mutlaka değiştirin.
+
+## Kullanım
+
+- **Dashboard**: Bugünkü yoklama özetini ve son kayıtları gösterir.
+- **Öğrenciler**: Yeni öğrenci eklenir; öğrenci numarası benzersizdir.
+- **Yoklama**: Tarih seçilip her öğrenci için durum (Var / Yok / Geç Kaldı) ve opsiyonel not girilir. Aynı öğrenci + tarih için kayıt güncellenir (tekrar yoklama yapılmaz).
+
+## Testler
+
+```bash
+pytest test_attendance_system.py
+```
+
+Testler izole bir veritabanı (`:memory:`) kullanır; mevcut verilerinize dokunmaz.
 
 ## Veritabanı
 
-Uygulama SQLite kullanmaktadır. Varsayılan veritabanı dosyası:
+Uygulama SQLite kullanır. Varsayılan dosya:
 
 ```text
 attendance_system.db
 ```
 
-Bu veritabanı, öğrenciler ve yoklama kayıtları gibi bilgileri saklar. Proje küçük ölçekli olduğu için SQLite yeterli ve pratik bir seçenektir.
+Tablolar:
 
-## Amaç ve Hedefler
-
-Bu proje, sistem analizi ve tasarım dersi kapsamında öğrencilerin devamsızlık işlemlerini daha düzenli, hızlı ve verimli bir şekilde takip edebilecek sade bir web uygulaması geliştirmeyi amaçlamaktadır. Amaç, öğretmenin her gün öğrencilerin yoklama durumunu tek bir sistem üzerinden kontrol etmesi, yeni öğrencileri kaydetmesi ve devamsızlık bilgilerini düzenli bir şekilde takip edebilmesidir. Bu bağlamda proje, gereksiz ve karmaşık özelliklerden arındırılarak yalnızca temel işlevlere odaklanmıştır. Böylece sistemin kullanım kolaylığı artmış, iş akışı daha anlaşılır hale gelmiş ve proje sunum sırasında daha etkili bir örnek çalışma olarak kullanılabilmiştir. Öğrencilerin bilgilerini güvenli ve düzenli şekilde saklamak, günlük yoklama kayıtlarını doğru tutmak ve bu veriler üzerinden temel istatistikleri görmek, proje kapsamında öncelikli hedefler arasında yer almaktadır. Ayrıca sistemin küçük ölçekli olması, temel yazılım geliştirme süreçlerini anlamayı kolaylaştırır. Bu nedenle proje, sistem analizi ve tasarım dersi için uygun, sade ve anlaşılır bir örnek çalışma olarak hazırlanmıştır. Proje geliştirilirken kullanıcı ihtiyaçları, işlevsel gereksinimler ve veri yönetimi gibi temel kavramlar dikkatle ele alınmıştır. Sonuç olarak bu uygulama, devamsızlık takibinin daha basit ve erişilebilir bir şekilde yapılabilmesini sağlar; aynı zamanda öğrencilerin ve öğretmenin iş yükünü azaltmayı hedefler.
-
-## Yöntem
-
-Projenin geliştirilmesinde Flask web frameworkü kullanılmıştır. Flask, hafif yapısı, kolay öğrenilebilir olması ve hızlı geliştirme imkanı nedeniyle bu tür bir öğrenci yoklama sistemi için uygun bir tercih olmuştur. Uygulamanın arka planında Python dili kullanılmış; bu sayede iş mantığı sade ve okunabilir bir şekilde yazılmıştır. Veritabanı olarak SQLite seçilmiştir. SQLite, ek sunucu kurulumu gerektirmemesi, küçük projelerde hızlı bir şekilde çalışması ve kurulumu kolay olması nedeniyle bu çalışma için ideal bir çözümdür. Sistemin yapısında yönetici giriş ekranı, öğrenci ekleme formu, yoklama kaydı ekranı ve anasayfa pano bölümleri oluşturulmuştur. Bu bileşenler, sistemin temel işleyişini temsil eder ve kullanıcıların işlevleri kolayca gerçekleştirmesini sağlar. Her öğrenci için ayrı bir kayıt oluşturulmuş ve her gün için yeni yoklama girişleri tutulmuştur. Bu kayıtlar "Var", "Yok" ve "Geç Kaldı" durumlarına göre sınıflandırılmıştır. Geliştirme sürecinde gereksiz modüller kaldırılmış, yalnızca devamsızlık takibi sürecine odaklanılmıştır. Böylece kullanıcı arayüzü sade tutulmuş ve sistem daha anlaşılır hale getirilmiştir. Ayrıca geliştirilen uygulama, öğretmenin günlük iş akışını kolaylaştıracak şekilde tasarlanmıştır. Tüm bu süreçler dikkate alınarak proje, küçük ama işlevsel bir yazılım çözümü olarak oluşturulmuştur. Bu yöntem, sistem analizi ve tasarım dersinde temel tasarım ve geliştirme prensiplerini anlamayı kolaylaştırır ve akademik olarak uygun bir örnek çalışma sunar.
+- `admins` — yönetici hesapları (şifre hash'lenmiş)
+- `students` — öğrenci bilgileri
+- `attendance` — `(student_id, date)` benzersizliği ile günlük yoklama kayıtları
 
 ## Proje Yapısı
 
 ```text
 SAT-2026-Kerim-Mert-Alkan/
-├── app.py
-├── database.py
-├── requirements.txt
+├── app.py                      # Flask uygulaması ve rotalar
+├── database.py                 # SQLite bağlantısı, şema ve seed verisi
+├── requirements.txt            # Python bağımlılıkları
+├── test_attendance_system.py   # Otomatik testler
 ├── README.md
 ├── .gitignore
-├── attendance_system.db
 ├── static/
-│   ├── css/
-│   └── js/
-├── templates/
-│   ├── auth/
-│   ├── attendance/
-│   ├── dashboard/
-│   ├── leaves/
-│   ├── users/
-│   ├── base.html
-│   ├── profile.html
-│   ├── settings.html
-│   └── system_analysis.html
-└── tests/
+│   ├── css/style.css
+│   └── js/main.js
+└── templates/
+    ├── base.html
+    ├── login.html
+    ├── dashboard.html
+    ├── students.html
+    ├── attendance.html
+    ├── profile.html
+    ├── settings.html
+    └── system_analysis.html
 ```
+
+## Amaç ve Hedefler
+
+Bu proje, sistem analizi ve tasarım dersi kapsamında; öğretmenin her gün öğrencilerin yoklama durumunu tek bir sistem üzerinden kontrol etmesi, yeni öğrencileri kaydetmesi ve devamsızlık bilgilerini düzenli takip edebilmesi hedefiyle hazırlanmıştır. Gereksiz ve karmaşık özelliklerden arındırılarak yalnızca temel işlevlere odaklanılmış; böylece kullanım kolaylığı artırılmış ve proje sunuma uygun sade bir örnek çalışma haline getirilmiştir.
+
+Temel hedefler:
+
+- Öğrenci ve yoklama verilerini güvenli ve düzenli saklamak
+- Günlük yoklama kayıtlarını doğru ve hızlı tutmak
+- Temel istatistikleri (var/yok/geç kaldı) tek bakışta göstermek
+- Sistemi küçük ölçekli tutarak temel yazılım geliştirme süreçlerini anlaşılır kılmak
+
+## Yöntem
+
+Proje **Flask** web frameworkü ile geliştirilmiştir; hafif yapısı ve hızlı geliştirme imkânı sayesinde bu tür bir öğrenci yoklama sistemi için uygun bir tercihtir. İş mantığı **Python** ile yazılmış, veri katmanında ek sunucu kurulumu gerektirmeyen **SQLite** kullanılmıştır.
+
+Sistem şu bileşenlerden oluşur:
+
+- **Giriş ekranı** — hash'lenmiş şifre ile yönetici doğrulaması
+- **Dashboard** — günlük özet istatistikler ve son yoklama kayıtları
+- **Öğrenci yönetimi** — öğrenci ekleme ve listeleme
+- **Yoklama ekranı** — tarih bazlı durum girişi (`Var` / `Yok` / `Geç Kaldı`) ve not
+
+Her öğrenci için tek kayıt tutulur; `(öğrenci, tarih)` çifti benzersizdir, böylece aynı gün tekrar giriş yapıldığında kayıt güncellenir. Arayüz sade tutulmuş, ana işlevler öne çıkarılmıştır.
 
 ## Lisans
 
