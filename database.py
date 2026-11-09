@@ -58,6 +58,9 @@ def init_db():
         )
     ''')
 
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(date)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_students_active ON students(is_active)')
+
     conn.commit()
 
     admin_exists = conn.execute('SELECT 1 FROM admins LIMIT 1').fetchone()
