@@ -58,3 +58,41 @@ def test_invalid_attendance_date_is_rejected_without_saving():
     attendance_count = conn.execute("SELECT COUNT(*) FROM attendance").fetchone()[0]
     conn.close()
     assert attendance_count == 0
+
+
+def test_health_check_returns_ok():
+    app = create_app({"TESTING": True, "DB_PATH": ":memory:"})
+    client = app.test_client()
+
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["status"] == "ok"
+    assert data["database"] == "ok"
+    assert "version" in data
+
+
+def test_attendance_export_returns_csv():
+    app = create_app({"TESTING": True, "DB_PATH": ":memory:"})
+    client = app.test_client()
+
+    client.post("/login", data={"username": "admin", "password": "admin123"}, follow_redirects=False)
+    client.post(
+        "/students/add",
+        data={"name": "Test Ogrenci", "student_number": "9999", "class_name": "Test Sinif"},
+        follow_redirects=False,
+    )
+    client.post(
+        "/attendance/mark",
+        data={"student_id": "1", "status": "Var", "date": "2026-10-05"},
+        follow_redirects=False,
+    )
+
+    response = client.get("/attendance/export?date=2026-10-05")
+
+    assert response.status_code == 200
+    assert "text/csv" in response.content_type
+    content = response.get_data(as_text=True)
+    assert "9999" in content
+    assert "Var" in content
