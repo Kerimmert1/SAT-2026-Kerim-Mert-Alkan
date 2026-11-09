@@ -209,9 +209,25 @@ def create_app(test_config=None):
         flash('Yoklama kaydı başarıyla güncellendi.', 'success')
         return redirect(url_for('attendance_records', date=date_value))
 
+    APP_VERSION = '1.1.0'
+
     @app.route('/health')
     def health_check():
-        return {'status': 'ok'}
+        db_status = 'ok'
+        try:
+            conn = get_db()
+            conn.execute('SELECT 1')
+            conn.close()
+        except Exception:
+            db_status = 'error'
+
+        payload = {
+            'status': 'ok' if db_status == 'ok' else 'error',
+            'database': db_status,
+            'version': APP_VERSION,
+        }
+        status_code = 200 if db_status == 'ok' else 503
+        return payload, status_code
 
     return app
 
