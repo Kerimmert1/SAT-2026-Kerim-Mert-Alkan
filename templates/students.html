@@ -24,12 +24,32 @@
 
 <div class="panel" style="margin-top:20px;">
   <h2>Öğrenci Listesi</h2>
+  <form method="get" action="{{ url_for('students') }}" style="margin-bottom:16px;">
+    <div class="two-col">
+      <div>
+        <label>Arama</label>
+        <input type="text" name="q" value="{{ search or '' }}" placeholder="Ad veya numara">
+      </div>
+      <div>
+        <label>Sınıf</label>
+        <select name="class_name">
+          <option value="">Tümü</option>
+          {% for class_name in classes %}
+          <option value="{{ class_name }}" {% if class_filter == class_name %}selected{% endif %}>{{ class_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Filtrele</button>
+    <a href="{{ url_for('students') }}" class="btn">Temizle</a>
+  </form>
   <table>
     <thead>
       <tr>
         <th>Ad Soyad</th>
         <th>Öğrenci No</th>
         <th>Sınıf</th>
+        <th>İşlem</th>
       </tr>
     </thead>
     <tbody>
@@ -38,6 +58,11 @@
         <td>{{ student.name }}</td>
         <td>{{ student.student_number }}</td>
         <td>{{ student.class_name }}</td>
+        <td>
+          <form method="post" action="{{ url_for('delete_student', student_id=student.id) }}" style="display:inline;">
+            <button type="submit" class="btn btn-danger">Pasife Al</button>
+          </form>
+        </td>
       </tr>
       {% else %}
       <tr>

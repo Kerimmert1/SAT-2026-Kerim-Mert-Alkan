@@ -116,10 +116,26 @@ def create_app(test_config=None):
     @app.route('/students')
     @login_required
     def students():
+        search = request.args.get('q', '').strip()
+        class_filter = request.args.get('class_name', '').strip()
+
+        query = 'SELECT * FROM students WHERE is_active = 1'
+        params = []
+        if search:
+            query += ' AND (name LIKE ? OR student_number LIKE ?)'
+            params.extend([f'%{search}%', f'%{search}%'])
+        if class_filter:
+            query += ' AND class_name = ?'
+            params.append(class_filter)
+        query += ' ORDER BY name ASC'
+
         conn = get_db()
-        rows = conn.execute('SELECT * FROM students WHERE is_active = 1 ORDER BY name ASC').fetchall()
+        rows = conn.execute(query, params).fetchall()
+        classes = [row['class_name'] for row in conn.execute(
+            'SELECT DISTINCT class_name FROM students WHERE is_active = 1 ORDER BY class_name ASC'
+        ).fetchall()]
         conn.close()
-        return render_template('students.html', students=rows)
+        return render_template('students.html', students=rows, search=search, class_filter=class_filter, classes=classes)
 
     @app.route('/students/add', methods=['POST'])
     @login_required
@@ -146,6 +162,16 @@ def create_app(test_config=None):
         conn.commit()
         conn.close()
         flash('Öğrenci başarıyla eklendi.', 'success')
+        return redirect(url_for('students'))
+
+    @app.route('/students/<int:student_id>/delete', methods=['POST'])
+    @login_required
+    def delete_student(student_id):
+        conn = get_db()
+        conn.execute('UPDATE students SET is_active = 0 WHERE id = ?', (student_id,))
+        conn.commit()
+        conn.close()
+        flash('Öğrenci pasife alındı.', 'info')
         return redirect(url_for('students'))
 
     @app.route('/attendance')
