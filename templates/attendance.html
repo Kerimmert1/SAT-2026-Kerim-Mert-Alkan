@@ -37,6 +37,7 @@
 
 <div class="panel" style="margin-top:20px;">
   <h2>{{ selected_date }} Tarihli Yoklama Listesi</h2>
+  <p><a class="btn btn-primary" href="{{ url_for('export_attendance', date=selected_date) }}">CSV Olarak İndir</a></p>
   <table>
     <thead>
       <tr>

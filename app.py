@@ -1,4 +1,6 @@
-﻿import os
+﻿import csv
+import io
+import os
 from datetime import date
 from functools import wraps
 
@@ -234,6 +236,30 @@ def create_app(test_config=None):
 
         flash('Yoklama kaydı başarıyla güncellendi.', 'success')
         return redirect(url_for('attendance_records', date=date_value))
+
+    @app.route('/attendance/export')
+    @login_required
+    def export_attendance():
+        selected_date = request.args.get('date') or date.today().isoformat()
+        conn = get_db()
+        rows = conn.execute('''
+            SELECT s.name, s.student_number, s.class_name, a.status, a.note
+            FROM attendance a
+            JOIN students s ON s.id = a.student_id
+            WHERE a.date = ?
+            ORDER BY s.name ASC
+        ''', (selected_date,)).fetchall()
+        conn.close()
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['Ad Soyad', 'Öğrenci No', 'Sınıf', 'Durum', 'Not', 'Tarih'])
+        for row in rows:
+            writer.writerow([row['name'], row['student_number'], row['class_name'], row['status'], row['note'] or '', selected_date])
+
+        response = app.response_class(output.getvalue(), mimetype='text/csv; charset=utf-8')
+        response.headers['Content-Disposition'] = f'attachment; filename=yoklama_{selected_date}.csv'
+        return response
 
     APP_VERSION = '1.1.0'
 
